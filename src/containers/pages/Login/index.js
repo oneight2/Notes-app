@@ -6,7 +6,7 @@ export default class Login extends Component {
             <div className="hero min-h-screen bg-base-200">
             <div className="flex-col justify-center hero-content lg:flex-row">
                 <div className="text-center lg:text-left">
-                    <h1 className="mb-5 text-5xl font-bold">Hello there</h1>
+                    <h1 className="mb-5 text-5xl font-bold">Login Page</h1>
                     <p className="mb-5">
                         Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
                         excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a
@@ -33,6 +33,9 @@ export default class Login extends Component {
                         <div className="form-control mt-6">
                             <input type="button" value="Login" className="btn btn-primary" />
                         </div>
+                            <label className="label">
+                                <a href="/register" className="label-text-alt">Register Account</a>
+                            </label>
                     </div>
                 </div>
             </div>
