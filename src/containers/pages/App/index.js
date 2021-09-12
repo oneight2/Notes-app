@@ -4,23 +4,23 @@ import Login from "../Login";
 import Register from "../Register";
 import Dashboard from "../Dashboard";
 import Header from "../../../components/header";
+import { Provider } from "react-redux";
+import { store } from "../../../config/redux";
 
 function App() {
   return (
-    <div>
-      <Header />
+    <Provider store={store}>
+      {/* <Header /> */}
       <Router>
         <Switch>
           <Route path="/login" component={Login} />
-          <Route path="/register">
-            <Register />
-          </Route>
+          <Route path="/register" component={Register} />
           <Route path="/">
             <Dashboard />
           </Route>
         </Switch>
       </Router>
-    </div>
+    </Provider>
   );
 }
 

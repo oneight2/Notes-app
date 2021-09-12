@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import firebase from "../../../config/firebase";
+import { connect } from "react-redux";
+import { registerUserAPI } from "../../../config/redux/action";
 
 class Register extends Component {
   state = {
@@ -12,22 +13,21 @@ class Register extends Component {
       [e.target.id]: e.target.value,
     });
   };
-  handelRegisterSubmit = () => {
+  handelRegisterSubmit = async () => {
     const { email, password } = this.state;
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        console.log(user);
-        // ...
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ..
+    const { history } = this.props;
+    const res = await this.props
+      .registerAPI({ email, password })
+      .catch((err) => err);
+    if (res) {
+      this.setState({
+        email: "",
+        password: "",
       });
+      history.push("/login");
+    } else {
+      console.log("Error Register");
+    }
   };
   render() {
     return (
@@ -53,6 +53,7 @@ class Register extends Component {
                   id="email"
                   className="input input-bordered"
                   onChange={this.handleChangeText}
+                  value={this.state.email}
                 />
               </div>
               <div className="form-control">
@@ -65,15 +66,21 @@ class Register extends Component {
                   id="password"
                   className="input input-bordered"
                   onChange={this.handleChangeText}
+                  value={this.state.password}
                 />
               </div>
               <div className="form-control mt-6">
-                <button
-                  className="btn btn-primary"
-                  onClick={this.handelRegisterSubmit}
-                >
-                  Register
-                </button>
+                {this.props.isLoading ? (
+                  <button className="btn btn-primary loading"></button>
+                ) : (
+                  <button
+                    className="btn btn-primary"
+                    onClick={this.handelRegisterSubmit}
+                    loading={this.props.isLoading}
+                  >
+                    Register
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -83,4 +90,11 @@ class Register extends Component {
   }
 }
 
-export default Register;
+const reduxState = (state) => ({
+  isLoading: state.isLoading,
+});
+const reduxDispatch = (dispatch) => ({
+  registerAPI: (data) => dispatch(registerUserAPI(data)),
+});
+
+export default connect(reduxState, reduxDispatch)(Register);
