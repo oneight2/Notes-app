@@ -24,6 +24,12 @@ const reducer = (state = intialState, action) => {
       isLoading: action.value,
     };
   }
+  if (action.type === "CHANGE_USER") {
+    return {
+      ...state,
+      user: action.value,
+    };
+  }
   return state;
 };
 

@@ -1,4 +1,4 @@
-import firebase from "../../firebase";
+import firebase, { database } from "../../firebase";
 
 export const registerUserAPI = (data) => (dispatch) => {
   return new Promise((resolve, reject) => {
@@ -57,5 +57,13 @@ export const loginUserAPI = (data) => (dispatch) => {
 
         // ..
       });
+  });
+};
+
+export const addDataToAPI = (data) => (dispatch) => {
+  database.ref("notes/" + data.userId).push({
+    title: data.title,
+    content: data.content,
+    date: data.date,
   });
 };
