@@ -40,6 +40,8 @@ export const loginUserAPI = (data) => (dispatch) => {
           emailVerified: user.emailVerified,
         };
 
+        localStorage.setItem("userData", JSON.stringify(userData));
+
         console.log("successLogin:", userData);
         dispatch({ type: "CHANGE_LOADING", value: false });
         dispatch({ type: "CHANGE_ISLOGIN", value: true });
@@ -65,5 +67,24 @@ export const addDataToAPI = (data) => (dispatch) => {
     title: data.title,
     content: data.content,
     date: data.date,
+  });
+};
+
+export const getDataFormAPI = (userId) => (dispatch) => {
+  const urlNotes = database.ref("notes/" + userId);
+  return new Promise((resolve, reject) => {
+    urlNotes.on("value", function (snapshot) {
+      // UBAH OBJECT KE ARRAY PAKE OBJECT.KEYS
+      console.log("get Data", snapshot.val());
+      const data = [];
+      Object.keys(snapshot.val()).map((key) => {
+        data.push({
+          id: key,
+          data: snapshot.val()[key],
+        });
+      });
+      dispatch({ type: "SET_NOTES", value: data });
+      resolve(snapshot.val());
+    });
   });
 };

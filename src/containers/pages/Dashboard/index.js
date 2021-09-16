@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import { addDataToAPI } from "../../../config/redux/action";
+import { addDataToAPI, getDataFormAPI } from "../../../config/redux/action";
 
 class Dashboard extends Component {
   state = {
@@ -8,15 +8,22 @@ class Dashboard extends Component {
     content: "",
     date: "",
   };
+
+  componentDidMount() {
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    this.props.getNotes(userData.uid);
+  }
+
   handleSaveNotes = async () => {
     const { title, content } = this.state;
     const { saveNotes } = this.props;
     const res = await this.props;
+    const userData = JSON.parse(localStorage.getItem("userData"));
     const data = {
       title: title,
       content: content,
       date: new Date().getTime(),
-      userId: this.props.userData.uid,
+      userId: userData.uid,
     };
 
     saveNotes(data);
@@ -40,6 +47,7 @@ class Dashboard extends Component {
 
   render() {
     const { title, content, date } = this.state;
+    const { notes } = this.props;
 
     return (
       <div className="container">
@@ -85,13 +93,25 @@ class Dashboard extends Component {
             </div>
           </div>
           <div className="divider mx-20">CONTENT</div>
-          <div className="card shadow-lg mx-auto bg-primary text-white w-full max-w-xl">
-            <div className="card-body">
-              <h2 className="card-title mb-0">Tittle</h2>
-              <p className="text-gray-300 mb-3">14 September 2021</p>
-              <p>Rerum reiciendis beatae tenetur excepturi</p>
-            </div>
-          </div>
+
+          {notes.length > 0 ? (
+            <Fragment>
+              {notes.map((note) => {
+                return (
+                  <div
+                    className="card shadow-lg mx-auto bg-primary text-white w-full max-w-xl my-2"
+                    key={note.id}
+                  >
+                    <div className="card-body">
+                      <h2 className="card-title mb-0">{note.data.title}</h2>
+                      <p className="text-gray-300 mb-3">{note.data.date}</p>
+                      <p>{note.data.content}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </Fragment>
+          ) : null}
         </div>
       </div>
     );
@@ -101,8 +121,10 @@ class Dashboard extends Component {
 const reduxState = (state) => ({
   userData: state.user,
   isLoading: state.isLoading,
+  notes: state.notes,
 });
 const reduxDispatch = (dispatch) => ({
   saveNotes: (data) => dispatch(addDataToAPI(data)),
+  getNotes: (data) => dispatch(getDataFormAPI(data)),
 });
 export default connect(reduxState, reduxDispatch)(Dashboard);

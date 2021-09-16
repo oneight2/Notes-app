@@ -24,7 +24,7 @@ class Login extends Component {
         email: "",
         password: "",
       });
-      console.log("Login Success");
+      console.log("Login Success: ", res);
       history.push("/");
     } else {
       console.log("Login Failed");
