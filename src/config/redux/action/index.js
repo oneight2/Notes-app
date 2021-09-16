@@ -70,21 +70,52 @@ export const addDataToAPI = (data) => (dispatch) => {
   });
 };
 
-export const getDataFormAPI = (userId) => (dispatch) => {
+export const getDataFromAPI = (userId) => (dispatch) => {
   const urlNotes = database.ref("notes/" + userId);
   return new Promise((resolve, reject) => {
     urlNotes.on("value", function (snapshot) {
       // UBAH OBJECT KE ARRAY PAKE OBJECT.KEYS
-      console.log("get Data", snapshot.val());
-      const data = [];
-      Object.keys(snapshot.val()).map((key) => {
-        data.push({
-          id: key,
-          data: snapshot.val()[key],
+      // console.log("get Data", snapshot.val());
+      if (snapshot.val() != null) {
+        const data = [];
+        Object.keys(snapshot.val()).map((key) => {
+          data.push({
+            id: key,
+            data: snapshot.val()[key],
+          });
         });
-      });
-      dispatch({ type: "SET_NOTES", value: data });
-      resolve(snapshot.val());
+        dispatch({ type: "SET_NOTES", value: data });
+        resolve(snapshot.val());
+      }
     });
+  });
+};
+
+export const updateDataFormAPI = (data) => (dispatch) => {
+  const urlNotes = database.ref(`notes/${data.userId}/${data.noteId}`);
+  return new Promise((resolve, reject) => {
+    urlNotes.set(
+      {
+        title: data.title,
+        content: data.content,
+        date: data.date,
+      },
+      (err) => {
+        if (err) {
+          reject(false);
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
+};
+
+export const deleteDataFormAPI = (data) => (dispatch) => {
+  const urlNotes = database.ref(`notes/${data.userId}/${data.noteId}`);
+  console.log("action:", data);
+  console.log("url:", urlNotes);
+  return new Promise((resolve, reject) => {
+    urlNotes.remove();
   });
 };

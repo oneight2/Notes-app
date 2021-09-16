@@ -1,12 +1,19 @@
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import { addDataToAPI, getDataFormAPI } from "../../../config/redux/action";
+import {
+  addDataToAPI,
+  deleteDataFormAPI,
+  getDataFromAPI,
+  updateDataFormAPI,
+} from "../../../config/redux/action";
 
 class Dashboard extends Component {
   state = {
     title: "",
     content: "",
     date: "",
+    textButton: "Simpan",
+    noteId: "",
   };
 
   componentDidMount() {
@@ -15,8 +22,8 @@ class Dashboard extends Component {
   }
 
   handleSaveNotes = async () => {
-    const { title, content } = this.state;
-    const { saveNotes } = this.props;
+    const { title, content, textButton, noteId } = this.state;
+    const { saveNotes, updateNotes } = this.props;
     const res = await this.props;
     const userData = JSON.parse(localStorage.getItem("userData"));
     const data = {
@@ -26,7 +33,13 @@ class Dashboard extends Component {
       userId: userData.uid,
     };
 
-    saveNotes(data);
+    if (textButton === "Simpan") {
+      saveNotes(data);
+    } else {
+      data.noteId = noteId;
+      updateNotes(data);
+    }
+
     if (res) {
       this.setState({
         title: "",
@@ -45,12 +58,43 @@ class Dashboard extends Component {
     });
   };
 
+  updateNotesData = (note) => {
+    this.setState({
+      title: note.data.title,
+      content: note.data.content,
+      textButton: "Update",
+      noteId: note.id,
+    });
+  };
+
+  cancelButton = () => {
+    this.setState({
+      title: "",
+      content: "",
+      textButton: "Simpan",
+      noteId: "",
+    });
+  };
+
+  deleteNotesData = (e, note) => {
+    // fungsi agar ketika klik card data tidak muncul di input
+    e.stopPropagation();
+    const { deleteNotes } = this.props;
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const data = {
+      userId: userData.uid,
+      noteId: note.id,
+    };
+    deleteNotes(data);
+    console.log(data);
+  };
+
   render() {
-    const { title, content, date } = this.state;
+    const { title, content, date, textButton } = this.state;
     const { notes } = this.props;
 
     return (
-      <div className="container">
+      <div className="container mx-auto">
         <div className="flex flex-col justify-center">
           <div className="card flex-shrink-0 w-full max-w-lg shadow-2xl bg-base-100 mx-auto my-20">
             <div className="card-body">
@@ -80,16 +124,21 @@ class Dashboard extends Component {
                   onChange={this.handleInputChange}
                 ></textarea>
               </div>
-              {this.props.isLoading ? (
-                <button className="btn btn-primary loading"></button>
-              ) : (
+              {textButton === "Update" ? (
                 <button
-                  className="btn btn-primary mt-10"
-                  onClick={this.handleSaveNotes}
+                  className="btn btn-warning mt-10"
+                  onClick={this.cancelButton}
                 >
-                  Simpan
+                  {" "}
+                  Cancel
                 </button>
-              )}
+              ) : null}
+              <button
+                className="btn btn-primary mt-3"
+                onClick={this.handleSaveNotes}
+              >
+                {textButton}
+              </button>
             </div>
           </div>
           <div className="divider mx-20">CONTENT</div>
@@ -99,13 +148,24 @@ class Dashboard extends Component {
               {notes.map((note) => {
                 return (
                   <div
-                    className="card shadow-lg mx-auto bg-primary text-white w-full max-w-xl my-2"
+                    className="card shadow-lg mx-auto bg-primary flex text-white w-full max-w-xl my-2 hover:bg-primary-focus"
                     key={note.id}
+                    onClick={() => {
+                      this.updateNotesData(note);
+                    }}
                   >
                     <div className="card-body">
                       <h2 className="card-title mb-0">{note.data.title}</h2>
                       <p className="text-gray-300 mb-3">{note.data.date}</p>
                       <p>{note.data.content}</p>
+                      <button
+                        className="btn btn-error mt-5 btn-sm"
+                        onClick={(e) => {
+                          this.deleteNotesData(e, note);
+                        }}
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 );
@@ -125,6 +185,8 @@ const reduxState = (state) => ({
 });
 const reduxDispatch = (dispatch) => ({
   saveNotes: (data) => dispatch(addDataToAPI(data)),
-  getNotes: (data) => dispatch(getDataFormAPI(data)),
+  getNotes: (data) => dispatch(getDataFromAPI(data)),
+  updateNotes: (data) => dispatch(updateDataFormAPI(data)),
+  deleteNotes: (data) => dispatch(deleteDataFormAPI(data)),
 });
 export default connect(reduxState, reduxDispatch)(Dashboard);
